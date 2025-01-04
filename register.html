@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Registrar</title>
+</head>
+<body>
+    <form action="{{ url_for('register') }}" method="POST">
+        <label for="username">Usuário:</label>
+        <input type="text" id="username" name="username" required>
+        <br>
+
+        <label for="password">Senha:</label>
+        <input type="password" id="password" name="password" required>
+        <br>
+
+        <label for="tipo_usuario">Tipo de Usuário:</label>
+        <select id="tipo_usuario" name="tipo_usuario" required>
+            <option value="usuario">Usuário</option>
+            <option value="caminhoneiro">Caminhoneiro</option>
+        </select>
+        <br>
+
+        <button type="submit">Registrar</button>
+    </form>
+    <p>Já tem uma conta? <a href="{{ url_for('login') }}">Login</a></p>
+</body>
+</html>
+

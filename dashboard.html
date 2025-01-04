@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Painel de Monitoramento</title>
+    <style>
+        /* Definir o tamanho do mapa */
+        #map {
+            height: 500px;
+            width: 100%;
+        }
+    </style>
+    <!-- Carregar a API do Google Maps -->
+    <script src="https://maps.googleapis.com/maps/api/js?key={{ google_maps_api_key }}&callback=initMap" async defer></script>
+
+
+</head>
+<body>
+    <h1>Bem-vindo ao Painel</h1>
+
+    <p><strong>Localização do usuário:</strong></p>
+    <ul>
+        <li>Cidade: {{ localizacao['cidade'] }}</li>
+        <li>País: {{ localizacao['pais'] }}</li>
+        <li>Latitude: {{ localizacao['latitude'] }}</li>
+        <li>Longitude: {{ localizacao['longitude'] }}</li>
+    </ul>
+
+    <!-- Adicionar o botão e o campo para mostrar a localização -->
+    <h2>Localização Dinâmica do Usuário</h2>
+    <button id="btn-localizacao">Mostrar minha Localização</button>
+    <div id="localizacao"></div>
+
+    <!-- Adicionar o botão e o campo para mostrar as localizações dos caminhoneiros -->
+    <h2>Localização dos Caminhoneiros</h2>
+    <button id="btn-localizacao-caminhoneiros">Mostrar Localizações dos Caminhoneiros</button>
+    <div id="localizacoes-caminhoneiros"></div>
+
+    <h2>Caminhoneiros Cadastrados</h2>
+    <ul>
+        {% for caminhoneiro in caminhoneiros %}
+        <li>{{ caminhoneiro.nome }} - Localização: {{ caminhoneiro.localizacao }}</li>
+        {% endfor %}
+    </ul>
+
+    <h2>Monitoramento de Caminhões de Lixo</h2>
+    <div id="map"></div> <!-- O mapa será exibido aqui -->
+
+    <script>
+        // Função para inicializar o mapa
+        function initMap() {
+            var mapOptions = {
+                zoom: 12,
+                center: { lat: parseFloat('{{ localizacao["latitude"] }}'), lng: parseFloat('{{ localizacao["longitude"] }}') },  // Localização inicial com a do usuário
+            };
+
+            var map = new google.maps.Map(document.getElementById('map'), mapOptions);
+
+            // Adicionar marcador para a localização do usuário (com a seta)
+            var userMarker = new google.maps.Marker({
+                position: { lat: parseFloat('{{ localizacao["latitude"] }}'), lng: parseFloat('{{ localizacao["longitude"] }}') },
+                map: map,
+                title: 'Sua localização',
+                icon: {
+                    url: 'https://maps.google.com/mapfiles/ms/icons/blue-dot.png',  // Ícone padrão (pode ser substituído por uma seta personalizada)
+                    scaledSize: new google.maps.Size(50, 50) // Ajuste o tamanho do ícone
+                }
+            });
+
+            // Adicionar marcadores para os caminhões de lixo
+            {% for caminhoneiro in caminhoneiros %}
+                var marker = new google.maps.Marker({
+                    position: { lat: {{ caminhoneiro.latitude }}, lng: {{ caminhoneiro.longitude }} },
+                    map: map,
+                    title: '{{ caminhoneiro.nome }}'
+                });
+            {% endfor %}
+        }
+
+        // Adicionar funcionalidade do botão de localização do usuário
+        document.getElementById('btn-localizacao').addEventListener('click', function() {
+            fetch('/localizacao_usuario')
+                .then(response => response.json())
+                .then(data => {
+                    if (data.latitude && data.longitude) {
+                        document.getElementById('localizacao').innerText =
+                            'Minha Localização: ' + data.nome + ' - Latitude: ' + data.latitude + ' - Longitude: ' + data.longitude;
+                    } else {
+                        document.getElementById('localizacao').innerText = 'Localização não encontrada';
+                    }
+                })
+                .catch(error => {
+                    document.getElementById('localizacao').innerText = 'Erro ao obter localização';
+                });
+        });
+
+        // Adicionar funcionalidade do botão para localização dos caminhoneiros
+        document.getElementById('btn-localizacao-caminhoneiros').addEventListener('click', function() {
+            fetch('/localizacao_caminhoneiros')
+                .then(response => response.json())
+                .then(data => {
+                    const localizacoesDiv = document.getElementById('localizacoes-caminhoneiros');
+                    localizacoesDiv.innerHTML = '';
+                    data.forEach(caminhoneiro => {
+                        const info = document.createElement('p');
+                        info.textContent = caminhoneiro.nome + ' - Latitude: ' + caminhoneiro.latitude + ' - Longitude: ' + caminhoneiro.longitude;
+                        localizacoesDiv.appendChild(info);
+                    });
+                })
+                .catch(error => {
+                    document.getElementById('localizacoes-caminhoneiros').innerText = 'Erro ao obter localizações';
+                });
+        });
+    </script>
+</body>
+</html>
+
+
+
+
+

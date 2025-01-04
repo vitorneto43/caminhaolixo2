@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Página Inicial</title>
+</head>
+<body>
+    <h1>Bem-vindo ao Sistema de Monitoramento de Caminhões de Lixo</h1>
+
+    {% if current_user.is_authenticated %}
+        <p>Olá, {{ current_user.username }}! <a href="{{ url_for('dashboard') }}">Ir para o Dashboard</a></p>
+        <p><a href="{{ url_for('logout') }}">Sair</a></p>
+    {% else %}
+        <p><a href="{{ url_for('login') }}">Login</a></p>
+        <p><a href="{{ url_for('register') }}">Registrar-se</a></p>
+    {% endif %}
+</body>
+</html>
